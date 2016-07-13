@@ -1,0 +1,87 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <context:component-scan base-package="com.jinjiang.ssm">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    <bean id="txManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+
+
+    <tx:annotation-driven transaction-manager="txManager"/>
+    <!-- 使用spring自带的占位符替换功能 -->
+    <bean
+            class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <!-- 允许JVM参数覆盖 -->
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+        <!-- 忽略没有找到的资源文件 -->
+        <property name="ignoreResourceNotFound" value="true" />
+        <!-- 配置资源文件 -->
+        <property name="locations">
+            <list>
+                <value>classpath*:property/jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- spring的扫描包，便于注入Service -->
+
+    <!-- 使用BoneCp连接池 -->
+    <bean id="dataSource" class="com.jolbox.bonecp.BoneCPDataSource"
+          destroy-method="close">
+        <!-- 数据库驱动 -->
+        <property name="driverClass" value="${jdbc.driver}" />
+        <!-- 相应驱动的jdbcUrl -->
+        <property name="jdbcUrl" value="${jdbc.url}" />
+        <!-- 数据库的用户名 -->
+        <property name="username" value="${jdbc.username}" />
+        <!-- 数据库的密码 -->
+        <property name="password" value="${jdbc.password}" />
+        <!-- 每个分区最大的连接数 -->
+        <property name="maxConnectionsPerPartition" value="150" />
+        <!-- 每个分区最小的连接数 -->
+        <property name="minConnectionsPerPartition" value="5" />
+    </bean>
+
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="10"/>
+        <property name="maxWaitMillis" value="20000"/>
+
+    </bean>
+
+
+    <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <constructor-arg index="0" ref="jedisPoolConfig"/>
+        <property name="database" value="0"/>
+        <property name="hostName" value="127.0.0.1"/>
+        <property name="port" value="6379"/>
+        <property name="timeout" value="4000"/>
+        <property name="usePool" value="true"/>
+    </bean>
+    
+    
+    <bean class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisConnectionFactory"/>
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+    </bean>
+
+
+
+
+
+
+
+
+</beans>
