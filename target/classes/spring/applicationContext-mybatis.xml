@@ -16,11 +16,11 @@
         <property name="mapperLocations" value="classpath:mapper/**/*.xml"/>
 
         <!-- pojo别名扫描包 -->
-        <property name="typeAliasesPackage" value="com.jinjiang.ssm.domain"/>
+        <property name="typeAliasesPackage" value="com.ssm.demo"/>
     </bean>
 
     <!-- Mapper的扫描包 ，扫描所有的Mapper接口-->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.jinjiang.ssm.mapper" />
+        <property name="basePackage" value="com.ssm.demo.mapper" />
     </bean>
 </beans>
